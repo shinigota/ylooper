@@ -1,0 +1,12 @@
+export enum PlayerEventType {
+  RESTART,
+  PLAY_PAUSE,
+  INC_PLAYBACK_SPEED,
+  DEC_PLAYBACK_SPEED,
+  FWD_SEEK,
+  BWD_SEEK,
+  TGL_LOOP,
+  MUTE,
+  INC_VOL,
+  DEC_VOL
+}

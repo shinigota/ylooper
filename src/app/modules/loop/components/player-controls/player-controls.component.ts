@@ -4,12 +4,13 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {debounceTime, distinctUntilChanged, from, of} from "rxjs";
 import {PlayerService} from "@/global/services/player.service";
 import {LoopsService} from "@/global/services/loops.service";
-import {db, Loop, Video, VideoData} from "@/global/models";
+import {db, Loop, PlayerEventType, Video, VideoData} from "@/global/models";
 import {VideosService} from "@/global/services/videos.service";
 import {DUMMY_LOOP, DUMMY_VIDEO} from "@/global/const/loop.const";
 import {VideoLoop} from "@/global/models/menu.model";
 import {Clipboard} from '@angular/cdk/clipboard';
 import {YOUTUBE_URL} from "@/global/const/app.const";
+import {PlayerEventService} from "@/global/services/player-event.service";
 
 
 @Component({
@@ -47,7 +48,8 @@ export class PlayerControlsComponent {
               private playerService: PlayerService,
               private loopService: LoopsService,
               private videoService: VideosService,
-              private clipboard: Clipboard) {
+              private clipboard: Clipboard,
+              private playerEventService : PlayerEventService) {
 
     this.playerService.videoData$.subscribe((videoData) => {
       this.videoData = videoData
@@ -59,6 +61,11 @@ export class PlayerControlsComponent {
       this.initFromVideoLoop(videoLoop as VideoLoop);
     });
 
+    this.bindFormInputsToPlayer();
+    this.playerEventService.event$.subscribe( e => this.bindPlayerEvents(e));
+  }
+
+  private bindFormInputsToPlayer() {
     this.form.controls['url'].valueChanges.pipe(
       debounceTime(1000),
       distinctUntilChanged()
@@ -93,6 +100,18 @@ export class PlayerControlsComponent {
     ).subscribe(value => {
       this.playerService.setLoop(value);
     });
+  }
+
+  private bindPlayerEvents(e : PlayerEventType) {
+    switch (e) {
+      case PlayerEventType.INC_PLAYBACK_SPEED:
+        break;
+      case PlayerEventType.DEC_PLAYBACK_SPEED:
+        break;
+      case PlayerEventType.TGL_LOOP:
+        this.form.controls['loop'].setValue(!this._currentLoop.loop, {emitEvent: false});
+        break;
+    }
   }
 
   private initFromVideoLoop(videoLoop: VideoLoop) {

@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Loop, Video, VideoData} from "@/global/models";
+import {Loop, PlayerEventType, Video, VideoData} from "@/global/models";
 import {BehaviorSubject, Observable} from "rxjs";
 import {VideoLoop} from "@/global/models/menu.model";
+import {PlayerEventService} from "@/global/services/player-event.service";
+import {DUMMY_LOOP, DUMMY_VIDEO} from "@/global/const/loop.const";
 
 @Injectable({
   providedIn: 'root'
@@ -15,9 +17,8 @@ export class PlayerService {
   private YT_VIDEO_CUED = 5;
 
   private player: any = undefined;
-  private currentLoop: Loop | undefined;
-  private currentVideo: Video | undefined;
-  //private currentFlatLoop: FlatLoop = DUMMY_LOOP;
+  private currentLoop: Loop = DUMMY_LOOP;
+  private currentVideo: Video = DUMMY_VIDEO;
 
   private _playerState : number = this.YT_UNSTARTED;
 
@@ -39,8 +40,9 @@ export class PlayerService {
   get playerReady$(): Observable<boolean> {
     return this.playerReadyObservable.asObservable();
   }
-  constructor() {
+  constructor(private playerEventService : PlayerEventService) {
     setInterval(() => this.checkTimestamp(), 100);
+    this.playerEventService.event$.subscribe( e => this.bindPlayerEvents(e));
   }
 
   private checkTimestamp() {
@@ -53,6 +55,35 @@ export class PlayerService {
     }
   }
 
+  private bindPlayerEvents(e : PlayerEventType) {
+    switch (e) {
+      case PlayerEventType.RESTART:
+        this.toStart();
+        break;
+      case PlayerEventType.PLAY_PAUSE:
+        this.togglePlayResume();
+        break;
+      case PlayerEventType.INC_PLAYBACK_SPEED:
+        break;
+      case PlayerEventType.DEC_PLAYBACK_SPEED:
+        break;
+      case PlayerEventType.FWD_SEEK:
+        break;
+      case PlayerEventType.BWD_SEEK:
+        break
+      case PlayerEventType.TGL_LOOP:
+        console.log("BEFORE" + this.currentLoop.loop)
+        this.currentLoop.loop = !this.currentLoop.loop;
+        console.log("AFTER" + this.currentLoop.loop)
+        break;
+      case PlayerEventType.MUTE:
+        break;
+      case PlayerEventType.INC_VOL:
+        break;
+      case PlayerEventType.DEC_VOL:
+        break;
+    }
+  }
   private initPlayer() {
     let tag = document.createElement('script');
 
@@ -65,9 +96,6 @@ export class PlayerService {
         width: '100%',
         videoId: this.currentVideo?.ytId,
         playerVars: {
-         // start: this.currentLoop?.beginSec,
-         // end: this.currentLoop?.endSec,
-       //   loop: true,
           rel: 0
         },
         events: {
@@ -98,16 +126,12 @@ export class PlayerService {
         }
         this.player.setPlaybackRate(videoLoop.loop.playbackSpeed ?? 1);
       }
-      //  this.player.seekTo(loop.beginSec ?? 0);
-      //  this.player.setPlaybackRate(loop.playbackSpeed ?? 1);
     }
   }
 
   private onPlayerReady(event: any) {
     this._playerReady = true;
     this.playerReadyObservable.next(this._playerReady);
-    //this.player.seekTo(this.currentLoop?.beginSec ?? 0);
-   // this.player.setPlaybackRate(this.currentLoop?.playbackSpeed ?? 1);
   }
 
   private onPlayerStateChange(event: any) {
@@ -117,17 +141,16 @@ export class PlayerService {
       title: this.player.getVideoData().title
     }
     if (this._playerState === this.YT_UNSTARTED) {
-
       this.player.setPlaybackRate(this.currentLoop?.playbackSpeed ?? 1);
-      /*if (this.currentLoop?.loop) {
-        console.log(' SEEK TO ' + this.currentLoop?.beginSec)
-        this.player.seekTo(this.currentLoop?.beginSec ?? 0);
-      }*/
     }
+  }
 
-   /* if (this._playerState === this.YT_ENDED && this.currentLoop?.loop) {
-      this.player.seekTo(this.currentLoop?.beginSec);
-    }*/
+  public toStart() {
+    if (this.currentLoop?.loop) {
+      this.player.seekTo(this.currentLoop?.beginSec ?? 0);
+    } else {
+      this.player.seekTo(0);
+    }
   }
 
   public setStartSec(startSec: number) {
@@ -156,15 +179,6 @@ export class PlayerService {
   }
 
   public getVideoIdFromURL(url: String) : string | undefined {
-    /*let videoId = url.split('v=')[1];
-    if (!videoId) {
-      return undefined;
-    }
-    let ampersandPosition = videoId.indexOf('&');
-    if(ampersandPosition != -1) {
-      return videoId.substring(0, ampersandPosition);
-    }*/
-
     let idExtractor = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
     let match = url.match(idExtractor);
     let videoId = (match&&match[1].length==11)? match[1] : undefined;
