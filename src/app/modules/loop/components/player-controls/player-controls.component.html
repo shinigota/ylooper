@@ -1,0 +1,61 @@
+<form [formGroup]="form">
+  <div class="flex-grid">
+    <div class="col span">
+      <button mat-raised-button color="primary" (click)="saveLoopAsNew()">Save as new</button>
+    </div>
+    <div class="col span">
+      <button mat-raised-button color="primary" (click)="updateLoop()" [disabled]="this.currentLoop?.id === undefined">Update</button>
+    </div>
+    <div class="col span">
+      <button mat-raised-button color="primary" (click)="deleteLoop()" [disabled]="this.currentLoop?.id === undefined">Delete</button>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="flex-grid">
+    <div class="col span">
+      <mat-form-field appearance="fill">
+        <mat-label>Loop name</mat-label>
+        <input formControlName="name" matInput>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="flex-grid">
+    <div class="col span">
+      <mat-form-field appearance="fill">
+        <mat-label>Youtube URL</mat-label>
+        <input formControlName="url" matInput>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="flex-grid">
+      <div class="col shrink vertical-align-content">
+        <mat-slide-toggle formControlName="loop">Loop</mat-slide-toggle>
+      </div>
+      <div class="col span">
+        <mat-form-field appearance="fill">
+          <mat-label>Start</mat-label>
+          <input formControlName="beginSec" matInput>
+        </mat-form-field>
+      </div>
+      <div class="col span">
+        <mat-form-field appearance="fill" [style.width.%]="100">
+          <mat-label>End</mat-label>
+          <input formControlName="endSec" matInput>
+        </mat-form-field>
+      </div>
+  </div>
+
+  <div class="flex-grid">
+    <div class="col span">
+        <mat-slider formControlName="playbackSpeed" min="0" max="2" step="0.05" value="1" thumbLabel></mat-slider>
+    </div>
+  </div>
+  <div class="flex-grid">
+    <div class="col span">
+      <button mat-raised-button color="primary" (click)="togglePlayPause()">{{isPlaying ? 'Pause' : 'Play'}}</button>
+    </div>
+    <div class="col span">
+      <button mat-raised-button color="primary" (click)="share()" >Share</button>
+    </div>
+  </div>
+</form>

@@ -1,0 +1,19 @@
+<div class="menu">
+  <div class="main-container">
+    <div class="container">
+      <div *ngFor="let video of videos">
+        <div class="video" [ngClass]="{'active': this.selectedVideoId === video.ytId}" (click)="this.toggleFold($event)">
+          <div>{{video.name}}</div>
+        </div>
+        <div class="accordion"><app-loop-menu-video [video]="video" (selectVideoId)="onSelectVideoId($event)"></app-loop-menu-video></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="button-container">
+    <button mat-raised-button (click)="export()">Export</button>
+    <button mat-raised-button (click)="import()">Import</button>
+  </div>
+</div>
+<app-loop-import-modal #importModal></app-loop-import-modal>
+<app-loop-export-modal #exportModal></app-loop-export-modal>

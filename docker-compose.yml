@@ -1,0 +1,10 @@
+version: "1"
+services:
+  node:
+    build: .
+    container_name: bbar-envdev-node:latest
+    ports:
+      - 4200:4200
+      - 49153:49153
+    volumes:
+      - ./:/home/app

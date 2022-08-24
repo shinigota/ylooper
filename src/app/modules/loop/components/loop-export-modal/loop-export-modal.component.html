@@ -1,0 +1,10 @@
+<app-modal [closable]="true" [title]="'Export loops'" #modal>
+  <div content>
+    <div>{{msgStatus}}</div>
+    <a #downloadLink></a>
+  </div>
+  <div footer>
+    <button (click)="download()" [disabled]="!ready">Download</button>
+    <button (click)="close()">Close</button>
+  </div>
+</app-modal>

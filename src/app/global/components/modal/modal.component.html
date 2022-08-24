@@ -1,0 +1,16 @@
+<div class="modal-mask" [class.open]="this.isActive"
+     (click)="close()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="header">
+      <span class="title">{{title}}</span>
+      <span *ngIf="closable" class="exit" (click)="close()">X</span>
+    </div>
+    <div class="content">
+      <ng-content select="[content]"></ng-content>
+    </div>
+    <div class="footer">
+      <ng-content select="[footer]"></ng-content>
+    </div>
+  </div>
+</div>
+

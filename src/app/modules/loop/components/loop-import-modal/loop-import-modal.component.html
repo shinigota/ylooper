@@ -1,0 +1,33 @@
+<!--
+<div class="modal-mask" [class.open]="this.isActive"
+         (click)="close()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="header">
+      <span class="title">Import loops</span>
+      <span class="exit" (click)="close()">X</span>
+    </div>
+    <div class="content">
+      <div>Importing loops will overwrite all your data.</div>
+      <div><input type="file" name="loops" id="fileInput" [formControl]="fileInput"></div>
+    </div>
+    <div class="footer">
+      <button (click)="close()">Cancel</button>
+      <button (click)="import()" disabled>Import</button>
+    </div>
+  </div>
+</div>
+
+-->
+
+<app-modal [closable]="true" [title]="'Import loops'" #modal>
+  <div content>
+    <div>Importing loops will overwrite all your data.</div>
+    <form [formGroup]="form">
+      <div><input type="file" name="loops" id="file" formControlName="file" (change)="onFileChange($event)"></div>
+    </form>
+  </div>
+  <div footer>
+    <button (click)="close()">Cancel</button>
+    <button (click)="import()"  [disabled]="!form.valid">Import</button>
+  </div>
+</app-modal>

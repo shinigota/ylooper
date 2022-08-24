@@ -1,0 +1,35 @@
+.flex-grid {
+  display: flex;
+
+  > .md-inline-form {
+    width: 100%;
+  }
+}
+
+.col {
+  padding: 5px;
+}
+
+.col.span {
+  flex: 1;
+  > * {
+    width: 100%;
+  }
+}
+
+.col.shrink {
+  flex-shrink: 0.5;
+}
+
+::ng-deep .mat-form-field-infix {
+  width: auto !important;
+}
+
+mat-slide-toggle {
+  margin-top: 1em;
+}
+
+.spacer {
+  height: 3em;
+}
+

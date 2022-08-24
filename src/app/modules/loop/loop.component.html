@@ -1,0 +1,20 @@
+<mat-sidenav-container id="sidenav-container" fullscreen>
+  <mat-sidenav mode="side" #drawer>
+    <app-loop-menu></app-loop-menu>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="flex-container padding">
+      <div id="player-container" class="padding resizable" style="width: 426px; height: 240px;">
+        <div class="spinner-container"><div class="loader"></div></div>
+
+        <div class="container z-index-2"><app-player></app-player></div>
+
+      </div>
+      <div class="container-grow">
+        <div class="padding controls-container">
+          <app-player-controls></app-player-controls>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

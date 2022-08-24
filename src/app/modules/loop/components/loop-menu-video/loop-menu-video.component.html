@@ -1,0 +1,5 @@
+<ng-container *ngFor="let loop of loops">
+  <div class="loop" [ngClass]="{'active': this.selectedLoopId === loop.id}" (click)="selectLoop(loop)">
+    <div>{{loop.name}}</div>
+  </div>
+</ng-container>
