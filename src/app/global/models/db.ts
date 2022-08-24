@@ -2,7 +2,7 @@ import Dexie, {Table} from "dexie";
 
 export interface Loop {
   id?: number;
-  videoId?: string;
+  videoId: string;
   name: string;
   //url: string;
   beginSec?: number;

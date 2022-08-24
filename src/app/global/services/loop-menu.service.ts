@@ -47,15 +47,14 @@ export class LoopMenuService {
     return this._observableVideoLoop.asObservable();
   }
 
-  public selectVideoLoop(loop : Loop) {
+  public async selectVideoLoop(loop: Loop) {
     if (loop.videoId) {
-      from(db.videos.get(loop.videoId)).subscribe(video => {
-        this._selectedVideoLoop = {
-          video: video!,
-          loop: loop
-        };
-        this._observableVideoLoop.next(this._selectedVideoLoop);
-      });
+      let video = await db.videos.get(loop.videoId);
+      this._selectedVideoLoop = {
+        video: video!,
+        loop: loop
+      };
+      this._observableVideoLoop.next(this._selectedVideoLoop);
     }
   }
 }

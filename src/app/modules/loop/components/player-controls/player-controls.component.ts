@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {LoopMenuService} from "@/global/services/loop-menu.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {debounceTime, distinctUntilChanged, of} from "rxjs";
+import {debounceTime, distinctUntilChanged, from, of} from "rxjs";
 import {PlayerService} from "@/global/services/player.service";
 import {LoopsService} from "@/global/services/loops.service";
 import {db, Loop, Video, VideoData} from "@/global/models";
@@ -119,7 +119,7 @@ export class PlayerControlsComponent {
   }
 
   updateLoop() {
-    this.loopService.update(this.formToLoop());
+    this.loopService.update(this.formToVideo(), this.formToLoop());
   }
 
   saveLoopAsNew() {
@@ -129,10 +129,10 @@ export class PlayerControlsComponent {
     db.videos.get(this.playerService.getVideoIdFromURL(this.form.controls['url'].value) ?? 'none').then( matchingVideo => {
       let before = of("0");
       if (!matchingVideo) {
-        before = this.videoService.insert(this.formToVideo());
+        before = from(this.videoService.insert(this.formToVideo()));
       }
       before.subscribe(videoId => {
-        this.loopService.insert(tmpLoop).subscribe((id) => {
+        this.loopService.insert(tmpLoop).then((id) => {
           tmpLoop.id = id;
           this._currentLoop = tmpLoop;
         })

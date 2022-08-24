@@ -9,16 +9,12 @@ export class VideosService {
 
   constructor() { }
 
-  findById(id: string): Observable<Video | undefined> {
-    return from(db.videos.get(id));
+  findById(id: string) {
+    return db.videos.get(id);
   }
 
-  findByUrl(url: string): Observable<Video | undefined> {
-    return from(db.videos.where("url").equals(url).first());
-  }
-
-  insert(video: Video) : Observable<string> {
-    return from(db.videos.add(video));
+  insert(video: Video)  {
+    return db.videos.add(video);
   }
 
   update(video: Video) {

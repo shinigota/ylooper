@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {from, Observable} from 'rxjs';
-import {db, Loop} from '../models/';
+import {db, Loop, Video} from '../models/';
 
 @Injectable({
   providedIn: 'root'
@@ -9,36 +9,35 @@ export class LoopsService {
 
   constructor() { }
 
-  findById(id: number): Observable<Loop | undefined> {
-    return from(db.loops.get(id));
-    //return of(LOOPS.find(l => l.id == id));
+  findById(id: number) {
+    return db.loops.get(id);
   }
 
   findByVideoId(videoId: string) {
-    return from(db.loops.where("videoId").equals(videoId).toArray());
+    return db.loops.where("videoId").equals(videoId).toArray();
   }
 
-  insert(loop: Loop) : Observable<number> {
+  insert(loop: Loop) {
     loop.id = undefined;
-    return from(db.loops.add(loop));
+    return db.loops.add(loop);
   }
 
-  update(loop: Loop) {
-    db.loops.update(loop.id!, loop);
+  async update(video: Video, loop: Loop) {
+    let existingVideo = await db.videos.get(loop.videoId);
+    if(!existingVideo) {
+      await db.videos.add(video);
+    }
+    await db.loops.update(loop.id!, loop);
   }
 
-  delete(loop: Loop) {
+  async delete(loop: Loop) {
     if (loop.id) {
-      from(db.loops.delete(loop.id))
-        .subscribe(() => {
-          if (loop.videoId) {
-            this.findByVideoId(loop.videoId).subscribe((loops) => {
-              if (loops.length === 0) {
-                db.videos.delete(loop.videoId!);
-              }
-            });
-          }
-        });
+      await db.loops.delete(loop.id);
+
+      let loops = await this.findByVideoId(loop.videoId)
+      if (loops.length === 0) {
+        await db.videos.delete(loop.videoId!);
+      }
     }
     loop.id = undefined;
   }
