@@ -8,5 +8,28 @@ export enum PlayerEventType {
   TGL_LOOP,
   MUTE,
   INC_VOL,
-  DEC_VOL
+  DEC_VOL,
+  CUSTOM,
+  LOAD_LOOP
+}
+
+export enum PlayerEventFrom {
+  APP,
+  USER
+}
+
+export interface PlayerEvent {
+  type: PlayerEventType;
+  from: PlayerEventFrom;
+  value?: PartialLoop;
+}
+
+export interface PartialLoop {
+  id?: number;
+  videoId?: string;
+  name?: string;
+  beginSec?: number;
+  endSec?: number;
+  playbackSpeed?: number;
+  loop?: boolean;
 }

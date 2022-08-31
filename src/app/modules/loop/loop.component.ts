@@ -5,6 +5,9 @@ import {PlayerService} from "@/global/services/player.service";
 import {LoopMenuService} from "@/global/services/loop-menu.service";
 import {LoopImportModalComponent} from "@/modules/loop/components/loop-import-modal/loop-import-modal.component";
 import {LoopExportModalComponent} from "@/modules/loop/components/loop-export-modal/loop-export-modal.component";
+import {LoopEventService} from "@/global/services/loop-event.service";
+import {PlayerEventFrom, PlayerEventType} from "@/global/models";
+import {DUMMY_LOOP} from "@/global/const/loop.const";
 
 @Component({
   selector: 'app-loop',
@@ -19,9 +22,16 @@ export class LoopComponent implements OnInit, AfterViewInit {
 
   private resizeTimeout: any;
   constructor(private sideNavService: SideNavService,
-              private playerService: PlayerService) { }
+              private playerService: PlayerService,
+              private loopEventService : LoopEventService) { }
 
   ngOnInit(): void {
+    this.loopEventService.pushEvent({
+      from: PlayerEventFrom.APP,
+      type: PlayerEventType.LOAD_LOOP,
+      value: DUMMY_LOOP
+    });
+
     this.playerService.playerReady$.subscribe((playerReady) => {
       let playerContainer = document.getElementById('player-container');
       let player = document.getElementById('player');

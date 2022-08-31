@@ -1,7 +1,6 @@
-import {Injectable, OnInit} from '@angular/core';
-import {PlayerService} from "@/global/services/player.service";
-import {PlayerEventService} from "@/global/services/player-event.service";
-import {PlayerEventType} from "@/global/models";
+import {Injectable} from '@angular/core';
+import {PlayerEventFrom, PlayerEventType} from "@/global/models";
+import {LoopEventService} from "@/global/services/loop-event.service";
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +8,9 @@ import {PlayerEventType} from "@/global/models";
 export class ShortcutsService {
 
   private eventMap = new Map<string, PlayerEventType> ([
-    ['u', PlayerEventType.RESTART],
-    ['o', PlayerEventType.PLAY_PAUSE],
+    ['o', PlayerEventType.RESTART],
+    ["p", PlayerEventType.TGL_LOOP],
+   /* ['o', PlayerEventType.PLAY_PAUSE],
     ['i', PlayerEventType.INC_PLAYBACK_SPEED],
     ["k", PlayerEventType.DEC_PLAYBACK_SPEED],
     ["j", PlayerEventType.BWD_SEEK],
@@ -18,14 +18,14 @@ export class ShortcutsService {
     ["p", PlayerEventType.TGL_LOOP],
     ["m", PlayerEventType.MUTE],
     ["y", PlayerEventType.INC_VOL],
-    ["h", PlayerEventType.DEC_VOL],
+    ["h", PlayerEventType.DEC_VOL], */
   ]);
 
-  constructor(private playerEventService : PlayerEventService) { }
+  constructor(private loopEventService : LoopEventService) { }
 
   dispatchKeyPress(key: string) {
     if ( this.eventMap.has(key) ) {
-      this.playerEventService.event = this.eventMap.get(key) as PlayerEventType;
+      this.loopEventService.pushEvent({from: PlayerEventFrom.APP, type: this.eventMap.get(key) as PlayerEventType});
     }
   }
 

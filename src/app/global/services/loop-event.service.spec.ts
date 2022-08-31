@@ -1,13 +1,13 @@
 import {TestBed} from '@angular/core/testing';
 
-import {ShortcutsService} from './shortcuts.service';
+import {LoopEventService} from './loop-event.service';
 
-describe('ShortcutsService', () => {
-  let service: ShortcutsService;
+describe('LoopEventService', () => {
+  let service: LoopEventService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ShortcutsService);
+    service = TestBed.inject(LoopEventService);
   });
 
   it('should be created', () => {

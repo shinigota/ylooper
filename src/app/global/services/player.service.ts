@@ -1,8 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Loop, PlayerEventType, Video, VideoData} from "@/global/models";
+import {Loop, Video, VideoData} from "@/global/models";
 import {BehaviorSubject, Observable} from "rxjs";
-import {VideoLoop} from "@/global/models/menu.model";
-import {PlayerEventService} from "@/global/services/player-event.service";
 import {DUMMY_LOOP, DUMMY_VIDEO} from "@/global/const/loop.const";
 
 @Injectable({
@@ -18,31 +16,30 @@ export class PlayerService {
 
   private player: any = undefined;
   private currentLoop: Loop = DUMMY_LOOP;
-  private currentVideo: Video = DUMMY_VIDEO;
-
+  private _currentVideo: Video = DUMMY_VIDEO;
   private _playerState : number = this.YT_UNSTARTED;
 
-  private _videoData : VideoData = {
-    isPlaying: false,
-    title: 'Foo'
-  }
+  private _videoData : VideoData = { isPlaying: false, title: 'Foo' };
   private _observableVideoData = new BehaviorSubject<VideoData>(this._videoData);
+
+  private _playerReady: boolean = false;
+  private playerReadyObservable = new BehaviorSubject<boolean>(this._playerReady);
+
+  constructor() {
+    setInterval(() => this.checkTimestamp(), 100);
+  }
 
   get videoData$(): Observable<VideoData> {
     return this._observableVideoData.asObservable();
   }
+
   private set videoData(videoData: VideoData) {
     this._videoData = videoData;
     this._observableVideoData.next(videoData);
   }
-  private _playerReady: boolean = false;
-  private playerReadyObservable = new BehaviorSubject<boolean>(this._playerReady);
+
   get playerReady$(): Observable<boolean> {
     return this.playerReadyObservable.asObservable();
-  }
-  constructor(private playerEventService : PlayerEventService) {
-    setInterval(() => this.checkTimestamp(), 100);
-    this.playerEventService.event$.subscribe( e => this.bindPlayerEvents(e));
   }
 
   private checkTimestamp() {
@@ -55,35 +52,6 @@ export class PlayerService {
     }
   }
 
-  private bindPlayerEvents(e : PlayerEventType) {
-    switch (e) {
-      case PlayerEventType.RESTART:
-        this.toStart();
-        break;
-      case PlayerEventType.PLAY_PAUSE:
-        this.togglePlayResume();
-        break;
-      case PlayerEventType.INC_PLAYBACK_SPEED:
-        break;
-      case PlayerEventType.DEC_PLAYBACK_SPEED:
-        break;
-      case PlayerEventType.FWD_SEEK:
-        break;
-      case PlayerEventType.BWD_SEEK:
-        break
-      case PlayerEventType.TGL_LOOP:
-        console.log("BEFORE" + this.currentLoop.loop)
-        this.currentLoop.loop = !this.currentLoop.loop;
-        console.log("AFTER" + this.currentLoop.loop)
-        break;
-      case PlayerEventType.MUTE:
-        break;
-      case PlayerEventType.INC_VOL:
-        break;
-      case PlayerEventType.DEC_VOL:
-        break;
-    }
-  }
   private initPlayer() {
     let tag = document.createElement('script');
 
@@ -94,7 +62,7 @@ export class PlayerService {
       this.player = new (window as any)['YT'].Player('player', {
         height: '100%',
         width: '100%',
-        videoId: this.currentVideo?.ytId,
+        videoId: this._currentVideo.ytId,
         playerVars: {
           rel: 0
         },
@@ -106,30 +74,8 @@ export class PlayerService {
     };
   }
 
-  public loadVideoLoop(videoLoop: VideoLoop) {
-    let previousYtId = this.currentVideo?.ytId;
-    this.currentLoop = videoLoop.loop;
-    this.currentVideo = videoLoop.video;
-
-
-    if (!this.player) {
-      this.initPlayer();
-    } else {
-      if (previousYtId !== videoLoop.video.ytId) {
-        this.player.cueVideoById({
-          'videoId': videoLoop.video.ytId,
-          'startSec': videoLoop.loop.loop ? videoLoop.loop.beginSec : undefined
-        });
-      } else {
-        if (videoLoop.loop.loop) {
-          this.player.seekTo(videoLoop.loop.beginSec ?? 0);
-        }
-        this.player.setPlaybackRate(videoLoop.loop.playbackSpeed ?? 1);
-      }
-    }
-  }
-
   private onPlayerReady(event: any) {
+    console.log('ready');
     this._playerReady = true;
     this.playerReadyObservable.next(this._playerReady);
   }
@@ -145,7 +91,36 @@ export class PlayerService {
     }
   }
 
-  public toStart() {
+  loadVideoLoop(loop: Loop) {
+    let previousVideoId = this.currentLoop.videoId;
+    this.currentLoop = loop;
+
+    if (!this.player) {
+      this.initPlayer();
+    } else {
+      if (previousVideoId !== loop.videoId) {
+        this.player.cueVideoById({
+          'videoId': loop.videoId,
+          'startSec': loop.loop ? loop.beginSec : undefined
+        });
+      } else {
+        if (loop.loop) {
+          this.player.seekTo(loop.beginSec ?? 0);
+        }
+        this.player.setPlaybackRate(loop.playbackSpeed ?? 1);
+      }
+    }
+  }
+
+  seekTo(time: number) {
+    this.player.seekTo(time);
+  }
+
+  getCurrentTime(): number {
+    return this.player.getCurrentTime();
+  }
+
+  toStart() {
     if (this.currentLoop?.loop) {
       this.player.seekTo(this.currentLoop?.beginSec ?? 0);
     } else {
@@ -153,24 +128,24 @@ export class PlayerService {
     }
   }
 
-  public setStartSec(startSec: number) {
+  setStartSec(startSec: number) {
     this.currentLoop!.beginSec = startSec;
   }
 
-  public setEndSec(endSec: number) {
+  setEndSec(endSec: number) {
     this.currentLoop!.endSec = endSec;
   }
 
-  public setLoop(loopState: boolean) {
+  setLoop(loopState: boolean) {
     this.currentLoop!.loop = loopState;
   }
 
-  public setPlaybackRate(playbackSpeed: number) {
+  setPlaybackRate(playbackSpeed: number) {
     this.currentLoop!.playbackSpeed = playbackSpeed;
     this.player.setPlaybackRate(playbackSpeed);
   }
 
-  public togglePlayResume() {
+  togglePlayResume() {
     if (this._videoData.isPlaying) {
       this.player?.pauseVideo();
     } else {
@@ -178,11 +153,10 @@ export class PlayerService {
     }
   }
 
-  public getVideoIdFromURL(url: String) : string | undefined {
+  getVideoIdFromURL(url: String) : string | undefined {
     let idExtractor = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
     let match = url.match(idExtractor);
-    let videoId = (match&&match[1].length==11)? match[1] : undefined;
 
-    return videoId;
+    return (match&&match[1].length==11)? match[1] : undefined;
   }
 }

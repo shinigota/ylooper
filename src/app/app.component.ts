@@ -21,7 +21,5 @@ export class AppComponent implements OnInit {
   @HostListener('document:keypress', ['$event'])
   onKeyPress(event: KeyboardEvent) {
     this.shortcutsService.dispatchKeyPress(event.key);
-    event.preventDefault();
-    event.stopPropagation();
   }
 }
