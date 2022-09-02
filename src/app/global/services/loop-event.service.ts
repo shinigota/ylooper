@@ -85,6 +85,9 @@ export class LoopEventService {
         this._loop = valueToEmit as Loop;
         this.playerService.loadVideoLoop(this._loop);
         break;
+      case PlayerEventType.SELECT_LOOP:
+        valueToEmit = event.value!;
+        break;
     }
 
     console.log('EVENT', PlayerEventType[event.type], {

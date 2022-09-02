@@ -10,7 +10,8 @@ export enum PlayerEventType {
   INC_VOL,
   DEC_VOL,
   CUSTOM,
-  LOAD_LOOP
+  LOAD_LOOP,
+  SELECT_LOOP
 }
 
 export enum PlayerEventFrom {

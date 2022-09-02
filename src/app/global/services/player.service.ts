@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {Loop, Video, VideoData} from "@/global/models";
+import {Loop, VideoData} from "@/global/models";
 import {BehaviorSubject, Observable} from "rxjs";
-import {DUMMY_LOOP, DUMMY_VIDEO} from "@/global/const/loop.const";
+import {DUMMY_LOOP} from "@/global/const/loop.const";
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,6 @@ export class PlayerService {
 
   private player: any = undefined;
   private currentLoop: Loop = DUMMY_LOOP;
-  private _currentVideo: Video = DUMMY_VIDEO;
   private _playerState : number = this.YT_UNSTARTED;
 
   private _videoData : VideoData = { isPlaying: false, title: 'Foo' };
@@ -62,7 +61,7 @@ export class PlayerService {
       this.player = new (window as any)['YT'].Player('player', {
         height: '100%',
         width: '100%',
-        videoId: this._currentVideo.ytId,
+        videoId: this.currentLoop.videoId,
         playerVars: {
           rel: 0
         },
@@ -75,7 +74,6 @@ export class PlayerService {
   }
 
   private onPlayerReady(event: any) {
-    console.log('ready');
     this._playerReady = true;
     this.playerReadyObservable.next(this._playerReady);
   }
@@ -94,7 +92,6 @@ export class PlayerService {
   loadVideoLoop(loop: Loop) {
     let previousVideoId = this.currentLoop.videoId;
     this.currentLoop = loop;
-
     if (!this.player) {
       this.initPlayer();
     } else {
@@ -118,14 +115,6 @@ export class PlayerService {
 
   getCurrentTime(): number {
     return this.player.getCurrentTime();
-  }
-
-  toStart() {
-    if (this.currentLoop?.loop) {
-      this.player.seekTo(this.currentLoop?.beginSec ?? 0);
-    } else {
-      this.player.seekTo(0);
-    }
   }
 
   setStartSec(startSec: number) {

@@ -3,7 +3,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {debounceTime, distinctUntilChanged, from, of} from "rxjs";
 import {PlayerService} from "@/global/services/player.service";
 import {LoopsService} from "@/global/services/loops.service";
-import {db, Loop, PartialLoop, PlayerEventFrom, PlayerEventType, Video, VideoData} from "@/global/models";
+import {db, Loop, PlayerEventFrom, PlayerEventType, Video, VideoData} from "@/global/models";
 import {VideosService} from "@/global/services/videos.service";
 import {DUMMY_LOOP} from "@/global/const/loop.const";
 import {Clipboard} from '@angular/cdk/clipboard';
@@ -133,6 +133,7 @@ export class PlayerControlsComponent {
         this.loopService.insert(tmpLoop).then((id) => {
           tmpLoop.id = id;
           this._currentLoop = tmpLoop;
+          this.loopEventService.pushEvent({from: PlayerEventFrom.APP, type: PlayerEventType.SELECT_LOOP, value: this.currentLoop});
         })
       });
     });
