@@ -14,7 +14,7 @@ export class LoopMenuVideoComponent implements OnInit {
   video !: Video;
 
   @Output()
-  selectVideoId= new EventEmitter<number>();
+  selectVideoId = new EventEmitter<string>();
 
   selectedLoopId: number = -1;
   loops: Loop[] = [];
@@ -34,5 +34,6 @@ export class LoopMenuVideoComponent implements OnInit {
 
   selectLoop(loop: Loop) {
     this.loopMenuService.selectVideoLoop(loop);
+    this.selectVideoId.emit(loop.videoId);
   }
 }

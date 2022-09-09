@@ -17,30 +17,26 @@ export class LoopMenuComponent implements OnInit {
   @ViewChild("exportModal") private exportModal !: LoopExportModalComponent;
   private videos$ = from(liveQuery(() => db.videos.toArray()));
 
-  selectedVideoId: string = '0';
+  currentPlayingVideoId: string = '0';
+  clickedVideoId: string = '0';
+
   videos : Video[] = [];
 
   constructor(private menuService : LoopMenuService) {
     this.videos$.subscribe(videos => this.videos = videos);
     this.menuService.selectedLoop$
-      .subscribe(loop => this.selectedVideoId = loop.videoId ?? '0');
+      .subscribe(loop => {
+        this.currentPlayingVideoId = loop.videoId ?? '0'
+        this.clickedVideoId = this.currentPlayingVideoId;
+      });
   }
 
   ngOnInit(): void {
 
   }
 
-  onSelectVideoId($event: number) {
-    //this.selectedVideoId = $event;
-  }
-
-  toggleFold($event: MouseEvent) {
-    let element = $event.currentTarget as HTMLElement;
-    if (element.classList.contains('unfolded')) {
-      element.classList.remove('unfolded');
-    } else {
-      element.classList.add('unfolded');
-    }
+  onSelectVideoId(videoId: string) {
+    this.currentPlayingVideoId = videoId;
   }
 
   import() {
@@ -49,5 +45,9 @@ export class LoopMenuComponent implements OnInit {
 
   export() {
     this.exportModal.open();
+  }
+
+  onClickOnVideo(ytId: string) {
+    this.clickedVideoId = ytId;
   }
 }

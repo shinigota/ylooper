@@ -2,7 +2,10 @@
   <div class="main-container">
     <div class="container">
       <div *ngFor="let video of videos">
-        <div class="video" [ngClass]="{'active': this.selectedVideoId === video.ytId}" (click)="this.toggleFold($event)">
+        <div class="video"
+             [ngClass]="{'active': this.currentPlayingVideoId === video.ytId,
+                          'unfolded': this.clickedVideoId === video.ytId}"
+             (click)="this.onClickOnVideo(video.ytId)">
           <div>{{video.name}}</div>
         </div>
         <div class="accordion"><app-loop-menu-video [video]="video" (selectVideoId)="onSelectVideoId($event)"></app-loop-menu-video></div>
