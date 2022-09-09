@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {db, Loop, Video} from "@/global/models";
-import {filter, from} from "rxjs";
+import {from} from "rxjs";
 import {liveQuery} from "dexie";
 import {LoopMenuService} from "@/global/services/loop-menu.service";
 
@@ -20,9 +20,11 @@ export class LoopMenuVideoComponent implements OnInit {
   loops: Loop[] = [];
 
   constructor(private loopMenuService : LoopMenuService) {
-    this.loopMenuService.selectedVideoLoop$
-      .pipe(filter(x => x !== undefined))
-      .subscribe(videoLoop => this.selectedLoopId = videoLoop?.loop.id ?? -1);
+    this.loopMenuService.selectedLoop$
+      .subscribe(loop =>
+      {
+        this.selectedLoopId = loop.id ?? -1}
+      );
   }
 
   ngOnInit(): void {

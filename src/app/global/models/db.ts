@@ -16,12 +16,6 @@ export interface Video {
   name?: string;
 }
 
-export interface Folder {
-  id?: number;
-  parentFolderId?: number;
-  name: string;
-}
-
 export class AppDB extends Dexie {
   loops!: Table<Loop, number>;
   videos!: Table<Video, string>;
@@ -36,9 +30,8 @@ export class AppDB extends Dexie {
   }
 
   async populate() {
-    const demoVideoId = await db.videos.add({
+    await db.videos.add({
       name: 'Waffle falling over',
-      //url: 'https://www.youtube.com/watch?v=sDj72zqZakE',
       ytId: 'sDj72zqZakE'
     });
     await db.loops.add({
@@ -53,3 +46,4 @@ export class AppDB extends Dexie {
 }
 
 export const db = new AppDB();
+

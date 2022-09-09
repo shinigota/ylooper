@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {db, Video} from "@/global/models";
 import {liveQuery} from "dexie";
 import {LoopMenuService} from "@/global/services/loop-menu.service";
-import {filter, from} from "rxjs";
+import {from} from "rxjs";
 import {LoopImportModalComponent} from "@/modules/loop/components/loop-import-modal/loop-import-modal.component";
 import {LoopExportModalComponent} from "@/modules/loop/components/loop-export-modal/loop-export-modal.component";
 
@@ -22,9 +22,8 @@ export class LoopMenuComponent implements OnInit {
 
   constructor(private menuService : LoopMenuService) {
     this.videos$.subscribe(videos => this.videos = videos);
-    this.menuService.selectedVideoLoop$
-      .pipe(filter(x => x !== undefined))
-      .subscribe(videoLoop => this.selectedVideoId = videoLoop?.loop.videoId ?? '0');
+    this.menuService.selectedLoop$
+      .subscribe(loop => this.selectedVideoId = loop.videoId ?? '0');
   }
 
   ngOnInit(): void {

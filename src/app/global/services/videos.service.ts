@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {from, Observable} from "rxjs";
 import {db, Video} from "@/global/models";
 
 @Injectable({

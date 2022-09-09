@@ -1,15 +1,13 @@
 import {Component} from '@angular/core';
-import {LoopMenuService} from "@/global/services/loop-menu.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {debounceTime, distinctUntilChanged, from, of} from "rxjs";
 import {PlayerService} from "@/global/services/player.service";
 import {LoopsService} from "@/global/services/loops.service";
-import {db, Loop, Video, VideoData} from "@/global/models";
+import {db, Loop, PlayerEventFrom, PlayerEventType, Video, VideoData} from "@/global/models";
 import {VideosService} from "@/global/services/videos.service";
-import {DUMMY_LOOP, DUMMY_VIDEO} from "@/global/const/loop.const";
-import {VideoLoop} from "@/global/models/menu.model";
+import {DUMMY_LOOP} from "@/global/const/loop.const";
 import {Clipboard} from '@angular/cdk/clipboard';
-import {YOUTUBE_URL} from "@/global/const/app.const";
+import {LoopEventService} from "@/global/services/loop-event.service";
 
 
 @Component({
@@ -24,7 +22,6 @@ export class PlayerControlsComponent {
   };
 
   private _currentLoop: Loop = DUMMY_LOOP;
-  private _currentVideo: Video = DUMMY_VIDEO;
 
   get currentLoop() {
     return this._currentLoop;
@@ -43,75 +40,76 @@ export class PlayerControlsComponent {
     playbackSpeed: new FormControl(1, Validators.required),
   });
 
-  constructor(private loopMenuService: LoopMenuService,
-              private playerService: PlayerService,
+  constructor(private playerService: PlayerService,
               private loopService: LoopsService,
               private videoService: VideosService,
-              private clipboard: Clipboard) {
+              private clipboard: Clipboard,
+              private loopEventService: LoopEventService) {
 
     this.playerService.videoData$.subscribe((videoData) => {
       this.videoData = videoData
     });
 
-    this.loopMenuService.selectedVideoLoop$.subscribe((videoLoop) => {
-      if (typeof videoLoop === undefined)
+    this.loopEventService.loopEvent$.subscribe(event => {
+      if (event.from == PlayerEventFrom.USER)
         return;
-      this.initFromVideoLoop(videoLoop as VideoLoop);
-    });
 
+      let valToPatch : any = {};
+      if (event.value?.videoId)
+        valToPatch.url = 'https://www.youtube.com/watch?v=' + event.value?.videoId;
+      if (event.value?.name)
+        valToPatch.name = event.value?.name;
+      if (event.value?.beginSec)
+        valToPatch.beginSec = this.secondsToFormatedMinutes(event.value?.beginSec);
+      if (event.value?.endSec)
+        valToPatch.endSec = this.secondsToFormatedMinutes(event.value?.endSec);
+      if (event.value?.playbackSpeed)
+        valToPatch.playbackSpeed = event.value?.playbackSpeed;
+      if (event.value?.loop !== undefined)
+        valToPatch.loop = event.value?.loop;
+
+      this.form.patchValue(valToPatch, {emitEvent: false});
+    })
+
+    this.bindFormInputsToPlayer();
+}
+
+  private bindFormInputsToPlayer() {
     this.form.controls['url'].valueChanges.pipe(
       debounceTime(1000),
       distinctUntilChanged()
     ).subscribe(value => {
-      this.playerService.loadVideoLoop(this.formToVideoLoop());
+      this.loopEventService.pushEvent({from: PlayerEventFrom.USER, type: PlayerEventType.CUSTOM, value: {videoId: this.playerService.getVideoIdFromURL(this.form.controls['url'].value)}});
+
     });
 
     this.form.controls['beginSec'].valueChanges.pipe(
       debounceTime(1000),
       distinctUntilChanged()
     ).subscribe(value => {
-      this.playerService.setStartSec(this.formatedMinutesToSeconds(value) as number);
+      this.loopEventService.pushEvent({from: PlayerEventFrom.USER, type: PlayerEventType.CUSTOM, value: {beginSec: this.formatedMinutesToSeconds(value) as number}});
     });
 
     this.form.controls['endSec'].valueChanges.pipe(
       debounceTime(1000),
       distinctUntilChanged()
     ).subscribe(value => {
-      this.playerService.setEndSec(this.formatedMinutesToSeconds(value) as number);
+      this.loopEventService.pushEvent({from: PlayerEventFrom.USER, type: PlayerEventType.CUSTOM, value: {endSec: this.formatedMinutesToSeconds(value) as number}});
     });
 
     this.form.controls['playbackSpeed'].valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(value => {
-      this.playerService.setPlaybackRate(value);
+      this.loopEventService.pushEvent({from: PlayerEventFrom.USER, type: PlayerEventType.CUSTOM, value: {playbackSpeed: value}});
     });
 
     this.form.controls['loop'].valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(value => {
-      this.playerService.setLoop(value);
+      this.loopEventService.pushEvent({from: PlayerEventFrom.USER, type: PlayerEventType.CUSTOM, value: {loop: value}});
     });
-  }
-
-  private initFromVideoLoop(videoLoop: VideoLoop) {
-    this._currentLoop = videoLoop?.loop as Loop;
-    this._currentVideo = videoLoop?.video as Video;
-    this.form.controls['name'].setValue(this._currentLoop.name, {emitEvent: false});
-    this.form.controls['url'].setValue(`${YOUTUBE_URL}${this._currentVideo.ytId}`, {emitEvent: false});
-    this.form.controls['loop'].setValue(this._currentLoop.loop, {emitEvent: false});
-    if (typeof (this._currentLoop.beginSec) !== undefined) {
-      this.form.controls['beginSec'].setValue(this.secondsToFormatedMinutes(this._currentLoop.beginSec as number), {emitEvent: false});
-    } else {
-      this.form.controls['beginSec'].setValue('', {emitEvent: false});
-    }
-    if (typeof (this._currentLoop.endSec) !== undefined) {
-      this.form.controls['endSec'].setValue(this.secondsToFormatedMinutes(this._currentLoop.endSec as number), {emitEvent: false});
-    } else {
-      this.form.controls['endSec'].setValue('', {emitEvent: false});
-    }
-    this.form.controls['playbackSpeed'].setValue(this._currentLoop.playbackSpeed, {emitEvent: false});
   }
 
   togglePlayPause() {
@@ -135,6 +133,7 @@ export class PlayerControlsComponent {
         this.loopService.insert(tmpLoop).then((id) => {
           tmpLoop.id = id;
           this._currentLoop = tmpLoop;
+          this.loopEventService.pushEvent({from: PlayerEventFrom.APP, type: PlayerEventType.SELECT_LOOP, value: this.currentLoop});
         })
       });
     });
@@ -180,13 +179,6 @@ export class PlayerControlsComponent {
     return {
       ytId: this.playerService.getVideoIdFromURL(this.form.controls['url'].value) ?? '',
       name: this.videoData.title,
-    }
-  }
-
-  private formToVideoLoop(): VideoLoop {
-    return {
-      video: this.formToVideo() ,
-      loop: this.formToLoop()
     }
   }
 
