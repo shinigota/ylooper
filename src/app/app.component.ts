@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
     this.sideNavService.toggle();
   }
 
-  @HostListener('document:keypress', ['$event'])
+  @HostListener('document:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent) {
     this.shortcutsService.dispatchKeyPress(event.key);
   }

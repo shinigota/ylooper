@@ -8,17 +8,17 @@ import {LoopEventService} from "@/global/services/loop-event.service";
 export class ShortcutsService {
 
   private eventMap = new Map<string, PlayerEventType> ([
-    ['o', PlayerEventType.RESTART],
-    ["p", PlayerEventType.TGL_LOOP],
-   /* ['o', PlayerEventType.PLAY_PAUSE],
-    ['i', PlayerEventType.INC_PLAYBACK_SPEED],
-    ["k", PlayerEventType.DEC_PLAYBACK_SPEED],
-    ["j", PlayerEventType.BWD_SEEK],
-    ["l", PlayerEventType.FWD_SEEK],
-    ["p", PlayerEventType.TGL_LOOP],
-    ["m", PlayerEventType.MUTE],
-    ["y", PlayerEventType.INC_VOL],
-    ["h", PlayerEventType.DEC_VOL], */
+    ['ArrowUp', PlayerEventType.RESTART],
+    ['ArrowDown', PlayerEventType.TGL_LOOP],
+    [' ', PlayerEventType.PLAY_PAUSE],
+    // ['i', PlayerEventType.INC_PLAYBACK_SPEED],
+    // ["k", PlayerEventType.DEC_PLAYBACK_SPEED],
+    ['ArrowLeft', PlayerEventType.BWD_SEEK],
+    ['ArrowRight', PlayerEventType.FWD_SEEK],
+    // ["p", PlayerEventType.TGL_LOOP],
+    // ["m", PlayerEventType.MUTE],
+    // ["y", PlayerEventType.INC_VOL],
+    // ["h", PlayerEventType.DEC_VOL],
   ]);
 
   constructor(private loopEventService : LoopEventService) { }
