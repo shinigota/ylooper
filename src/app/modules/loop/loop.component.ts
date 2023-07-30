@@ -59,7 +59,6 @@ export class LoopComponent implements OnInit, AfterViewInit {
   private onResizeEnd() {
     let player = document.getElementById('player');
     player!.hidden = false;
-
   }
   toggleSideNav() {
     this.sideNavService.toggle();

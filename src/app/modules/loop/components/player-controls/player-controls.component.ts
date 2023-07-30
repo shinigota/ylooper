@@ -69,6 +69,10 @@ export class PlayerControlsComponent {
         valToPatch.loop = event.value?.loop;
 
       this.form.patchValue(valToPatch, {emitEvent: false});
+
+      if (event.type == PlayerEventType.LOAD_LOOP) {
+        this._currentLoop = event.value as Loop;
+      }
     })
 
     this.bindFormInputsToPlayer();
